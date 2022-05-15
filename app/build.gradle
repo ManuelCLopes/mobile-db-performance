@@ -46,6 +46,7 @@ android {
             jniDebuggable false
         }
     }
+    namespace 'io.objectbox.performanceapp'
 }
 
 dependencies {
