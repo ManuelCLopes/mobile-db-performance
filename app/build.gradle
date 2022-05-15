@@ -3,7 +3,7 @@ apply plugin: 'io.objectbox'
 apply plugin: 'realm-android'
 
 android {
-    compileSdkVersion 30 // Android 11
+    compileSdkVersion 32
 
     buildFeatures {
         viewBinding true
@@ -16,8 +16,8 @@ android {
 
     defaultConfig {
         applicationId "io.objectbox.performanceapp"
-        minSdkVersion 16 // Android 4.1
-        targetSdkVersion 30 // Android 11
+        minSdkVersion 16
+        targetSdkVersion 32
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -49,9 +49,9 @@ android {
 }
 
 dependencies {
-    implementation "androidx.room:room-runtime:2.3.0"
-    annotationProcessor "androidx.room:room-compiler:2.3.0"
-    implementation "io.objectbox:objectbox-android:$objectboxVersion"
+    implementation "androidx.room:room-runtime:2.4.2"
+    annotationProcessor "androidx.room:room-compiler:2.4.2"
+    implementation "io.objectbox:objectbox-android:3.1.2"
     implementation 'org.greenrobot:greendao:3.3.0'
     implementation 'org.greenrobot:essentials:3.1.0'
 }
