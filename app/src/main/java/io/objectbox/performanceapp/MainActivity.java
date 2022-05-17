@@ -92,7 +92,7 @@ public class MainActivity extends Activity implements Callback {
         binding.editTextRuns
                 .setText(String.valueOf(prefs.getInt(PREF_RUNS, 1)));
         binding.editTextNumberEntities
-                .setText(String.valueOf(prefs.getInt(PREF_COUNT, 100000)));
+                .setText(String.valueOf(prefs.getInt(PREF_COUNT, 1000000)));
     }
 
     private int getIntegerFromEditTextOrZero(EditText editText) {

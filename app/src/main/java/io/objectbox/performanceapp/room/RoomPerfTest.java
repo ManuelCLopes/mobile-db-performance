@@ -149,8 +149,8 @@ public class RoomPerfTest extends PerfTest {
     }
 
     private void runQueryByString() {
-        if (numberEntities > 10000) {
-            log("Reduce number of entities to 10000 to avoid extremely long test runs");
+        if (numberEntities > 100000000) {
+            log("Reduce number of entities to 100000000 to avoid extremely long test runs");
             return;
         }
         List<SimpleEntity> entities = new ArrayList<>(numberEntities);
@@ -219,8 +219,8 @@ public class RoomPerfTest extends PerfTest {
     }
 
     private void runQueryByInteger() {
-        if (numberEntities > 10000) {
-            log("Reduce number of entities to 10000 to avoid extremely long test runs");
+        if (numberEntities > 100000000) {
+            log("Reduce number of entities to 100000000 to avoid extremely long test runs");
             return;
         }
         List<SimpleEntity> entities = new ArrayList<>(numberEntities);

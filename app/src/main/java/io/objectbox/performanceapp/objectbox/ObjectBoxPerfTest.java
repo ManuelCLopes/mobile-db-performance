@@ -232,8 +232,8 @@ public class ObjectBoxPerfTest extends PerfTest {
     }
 
     private void runQueryByString() {
-        if (numberEntities > 10000) {
-            log("Reduce number of entities to 10000 to avoid extremely long test runs");
+        if (numberEntities > 100000000) {
+            log("Reduce number of entities to 100000000 to avoid extremely long test runs");
             return;
         }
         List<SimpleEntity> entities = prepareAndPutEntities(false);
@@ -254,8 +254,8 @@ public class ObjectBoxPerfTest extends PerfTest {
                 .equal(SimpleEntity_.simpleString, "", CASE_SENSITIVE)
                 .parameterAlias("string")
                 .build();
-        for (int i = 0; i < stringsToLookup.length; i++) {
-            query.setParameter("string", stringsToLookup[i]);
+        for (String s : stringsToLookup) {
+            query.setParameter("string", s);
             List<SimpleEntity> result = query.find();
             accessAll(result);
             entitiesFound += result.size();
@@ -265,8 +265,8 @@ public class ObjectBoxPerfTest extends PerfTest {
     }
 
     private void runQueryByInteger() {
-        if (numberEntities > 10000) {
-            log("Reduce number of entities to 10000 to avoid extremely long test runs");
+        if (numberEntities > 100000000) {
+            log("Reduce number of entities to 100000000 to avoid extremely long test runs");
             return;
         }
         List<SimpleEntity> entities = prepareAndPutEntities(false);
@@ -325,8 +325,8 @@ public class ObjectBoxPerfTest extends PerfTest {
                 .equal(SimpleEntityIndexed_.simpleString, "", CASE_SENSITIVE)
                 .parameterAlias("string")
                 .build();
-        for (int i = 0; i < stringsToLookup.length; i++) {
-            query.setParameter("string", stringsToLookup[i]);
+        for (String s : stringsToLookup) {
+            query.setParameter("string", s);
             List<SimpleEntityIndexed> result = query.find();
             accessAllIndexed(result);
             entitiesFound += result.size();

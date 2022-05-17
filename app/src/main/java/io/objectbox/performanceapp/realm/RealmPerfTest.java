@@ -240,8 +240,8 @@ public class RealmPerfTest extends PerfTest {
     }
 
     private void runQueryByString() {
-        if (numberEntities > 10000) {
-            log("Reduce number of entities to 10000 to avoid extremely long test runs");
+        if (numberEntities > 100000000) {
+            log("Reduce number of entities to 100000000 to avoid extremely long test runs");
             return;
         }
         List<SimpleEntity> entities = new ArrayList<>(numberEntities);
@@ -310,7 +310,7 @@ public class RealmPerfTest extends PerfTest {
     private void runQueryById(boolean randomIds) {
         List<SimpleEntity> entities = new ArrayList<>(numberEntities);
         for (int i = 0; i < numberEntities; i++) {
-            entities.add(createEntity((long) i, false));
+            entities.add(createEntity(i, false));
         }
 
         startBenchmark("insert");
@@ -327,6 +327,7 @@ public class RealmPerfTest extends PerfTest {
         startBenchmark("query");
         for (int i = 0; i < numberEntities; i++) {
             SimpleEntity entity = realm.where(SimpleEntity.class).equalTo("id", idsToLookup[i]).findFirst();
+            assert entity != null;
             accessAll(entity);
         }
         stopBenchmark();
