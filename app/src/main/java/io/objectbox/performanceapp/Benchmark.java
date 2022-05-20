@@ -16,6 +16,7 @@
 
 package io.objectbox.performanceapp;
 
+import android.annotation.SuppressLint;
 import android.os.Build;
 import android.os.SystemClock;
 import android.util.Log;
@@ -52,9 +53,10 @@ public class Benchmark {
     private int runs;
     private int warmUpRuns;
 
+    @SuppressLint("SimpleDateFormat")
     public Benchmark(File file) {
         this.file = file;
-        dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
         checkForLastHeader(file);
     }
 
@@ -109,7 +111,7 @@ public class Benchmark {
     }
 
     public Benchmark addFixedColumn(String key, String value) {
-        fixedColumns.add(new Pair<String, String>(key, value));
+        fixedColumns.add(new Pair<>(key, value));
         return this;
     }
 

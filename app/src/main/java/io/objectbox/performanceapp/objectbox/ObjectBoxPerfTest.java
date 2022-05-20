@@ -19,6 +19,7 @@ package io.objectbox.performanceapp.objectbox;
 import android.content.Context;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import io.objectbox.Box;
@@ -46,9 +47,9 @@ public class ObjectBoxPerfTest extends PerfTest {
         super.setUp(context, testRunner);
         store = MyObjectBox.builder().androidContext(context).build();
         store.close();
-        store.deleteAllFiles();
-        // 2 GB for DB to allow putting millions of objects
-        store = MyObjectBox.builder().androidContext(context).maxSizeInKByte(2 * 1024 * 1024).build();
+        //store.deleteAllFiles();
+        // 8 GB for DB to allow putting millions of objects
+        store = MyObjectBox.builder().androidContext(context).maxSizeInKByte(8 * 1024 * 1024).build();
         box = store.boxFor(SimpleEntity.class);
         boxIndexed = store.boxFor(SimpleEntityIndexed.class);
 
@@ -66,6 +67,8 @@ public class ObjectBoxPerfTest extends PerfTest {
 
     @Override
     public void run(TestType type) {
+        log("Prepared test data: " + box.count() + " objects");
+
         switch (type.name) {
             case TestType.CRUD:
                 runBatchPerfTest(false);
@@ -114,19 +117,22 @@ public class ObjectBoxPerfTest extends PerfTest {
         //noinspection UnusedAssignment
         list = null;
 
+        /*
         startBenchmark("load");
         List<SimpleEntity> reloaded = box.getAll();
         stopBenchmark();
+        */
+        //assertEntityCount(reloaded.size());
 
-        assertEntityCount(reloaded.size());
-
+        /*
         startBenchmark("access");
         accessAll(reloaded);
         stopBenchmark();
-
+        */
+        /*
         startBenchmark("delete");
         box.remove(reloaded);
-        stopBenchmark();
+        stopBenchmark();*/
     }
 
     protected void setRandomValues(SimpleEntity entity) {
@@ -139,7 +145,7 @@ public class ObjectBoxPerfTest extends PerfTest {
         entity.setSimpleBoolean(random.nextBoolean());
         entity.setSimpleByte((byte) random.nextInt());
         entity.setSimpleShort((short) random.nextInt());
-        entity.setSimpleInt(random.nextInt());
+        entity.setSimpleInt(random.nextInt(10));
         entity.setSimpleLong(random.nextLong());
         entity.setSimpleDouble(random.nextDouble());
         entity.setSimpleFloat(random.nextFloat());
@@ -232,64 +238,38 @@ public class ObjectBoxPerfTest extends PerfTest {
     }
 
     private void runQueryByString() {
-        if (numberEntities > 100000000) {
-            log("Reduce number of entities to 100000000 to avoid extremely long test runs");
-            return;
-        }
-        List<SimpleEntity> entities = prepareAndPutEntities(false);
-
-        final String[] stringsToLookup = new String[numberEntities];
-        for (int i = 0; i < stringsToLookup.length; i++) {
-            String text = "";
-            while (text.length() < 2) {
-                text = entities.get(random.nextInt(numberEntities)).getSimpleString();
-            }
-            stringsToLookup[i] = text;
-        }
+        String s = box.get(1).simpleString;
 
         startBenchmark("query");
 
-        long entitiesFound = 0;
         Query<SimpleEntity> query = box.query()
                 .equal(SimpleEntity_.simpleString, "", CASE_SENSITIVE)
                 .parameterAlias("string")
                 .build();
-        for (String s : stringsToLookup) {
-            query.setParameter("string", s);
-            List<SimpleEntity> result = query.find();
-            accessAll(result);
-            entitiesFound += result.size();
-        }
+        query.setParameter("string", s);
+        List<SimpleEntity> result = query.find();
+        accessAll(result);
+
         stopBenchmark();
-        log("Entities found: " + entitiesFound);
+        log("Entities found: " + result.size());
     }
 
     private void runQueryByInteger() {
-        if (numberEntities > 100000000) {
-            log("Reduce number of entities to 100000000 to avoid extremely long test runs");
-            return;
-        }
-        List<SimpleEntity> entities = prepareAndPutEntities(false);
-        final int[] valuesToLookup = new int[numberEntities];
-        for (int i = 0; i < numberEntities; i++) {
-            valuesToLookup[i] = entities.get(random.nextInt(numberEntities)).getSimpleInt();
-        }
+        int i = box.get(1).simpleInt;
 
         startBenchmark("query");
-        long entitiesFound = 0;
+
         Query<SimpleEntity> query = box.query()
-                .equal(SimpleEntity_.simpleInt, 0)
+                .equal(SimpleEntity_.simpleInt, i)
                 .parameterAlias("int")
                 .build();
-        for (int i = 0; i < numberEntities; i++) {
-            query.setParameter("int", valuesToLookup[i]);
-            List<SimpleEntity> result = query.find();
-            accessAll(result);
-            entitiesFound += result.size();
-        }
+        query.setParameter("int", i);
+        List<SimpleEntity> result = query.find();
+        accessAll(result);
+
         stopBenchmark();
-        log("Entities found: " + entitiesFound);
-        assertGreaterOrEqualToNumberOfEntities(entitiesFound);
+        log("Entities found: " + result.size());
+        //assertGreaterOrEqualToNumberOfEntities(entitiesFound);
     }
 
     private List<SimpleEntity> prepareAndPutEntities(boolean scalarsOnly) {
@@ -297,67 +277,47 @@ public class ObjectBoxPerfTest extends PerfTest {
         for (int i = 0; i < numberEntities; i++) {
             entities.add(createEntity(scalarsOnly));
         }
-        log("Prepared test data: " + numberEntities + " objects");
 
         startBenchmark("insert");
         box.put(entities);
+        log("Prepared test data: " + box.count() + " objects");
         stopBenchmark();
 
-        assertEntityCount(box.count());
+        //assertEntityCount(box.count());
         return entities;
     }
 
     private void runQueryByStringIndexed() {
-        List<SimpleEntityIndexed> entities = prepareAndPutEntitiesIndexed();
-
-        final String[] stringsToLookup = new String[numberEntities];
-        for (int i = 0; i < stringsToLookup.length; i++) {
-            String text = "";
-            while (text.length() < 2) {
-                text = entities.get(random.nextInt(numberEntities)).getSimpleString();
-            }
-            stringsToLookup[i] = text;
-        }
+        String s = boxIndexed.get(1).getSimpleString();
 
         startBenchmark("query");
-        long entitiesFound = 0;
         Query<SimpleEntityIndexed> query = boxIndexed.query()
                 .equal(SimpleEntityIndexed_.simpleString, "", CASE_SENSITIVE)
                 .parameterAlias("string")
                 .build();
-        for (String s : stringsToLookup) {
-            query.setParameter("string", s);
-            List<SimpleEntityIndexed> result = query.find();
-            accessAllIndexed(result);
-            entitiesFound += result.size();
-        }
+        query.setParameter("string", s);
+        List<SimpleEntityIndexed> result = query.find();
+        accessAllIndexed(result);
+
         stopBenchmark();
-        log("Entities found: " + entitiesFound);
-        assertGreaterOrEqualToNumberOfEntities(entitiesFound);
+        log("Entities found: " + result.size());
     }
 
     private void runQueryByIntegerIndexed() {
-        List<SimpleEntityIndexed> entities = prepareAndPutEntitiesIndexed();
-        final int[] valuesToLookup = new int[numberEntities];
-        for (int i = 0; i < numberEntities; i++) {
-            valuesToLookup[i] = entities.get(random.nextInt(numberEntities)).getSimpleInt();
-        }
+        int i = box.get(1).simpleInt;
 
         startBenchmark("query");
-        long entitiesFound = 0;
+
         Query<SimpleEntityIndexed> query = boxIndexed.query()
                 .equal(SimpleEntityIndexed_.simpleInt, 0)
                 .parameterAlias("int")
                 .build();
-        for (int i = 0; i < numberEntities; i++) {
-            query.setParameter("int", valuesToLookup[i]);
-            List<SimpleEntityIndexed> result = query.find();
-            accessAllIndexed(result);
-            entitiesFound += result.size();
-        }
+        query.setParameter("int", i);
+        List<SimpleEntityIndexed> result = query.find();
+        accessAllIndexed(result);
+
         stopBenchmark();
-        log("Entities found: " + entitiesFound);
-        assertGreaterOrEqualToNumberOfEntities(entitiesFound);
+        log("Entities found: " + result.size());
     }
 
     private List<SimpleEntityIndexed> prepareAndPutEntitiesIndexed() {
@@ -370,7 +330,7 @@ public class ObjectBoxPerfTest extends PerfTest {
         boxIndexed.put(entities);
         stopBenchmark();
 
-        assertEntityCount(boxIndexed.count());
+        //assertEntityCount(boxIndexed.count());
 
         return entities;
     }
@@ -396,7 +356,7 @@ public class ObjectBoxPerfTest extends PerfTest {
     @Override
     public void tearDown() {
         store.close();
-        store.deleteAllFiles();
+        //store.deleteAllFiles();
     }
 
 }
