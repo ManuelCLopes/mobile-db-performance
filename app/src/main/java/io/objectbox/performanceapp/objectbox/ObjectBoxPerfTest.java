@@ -269,7 +269,6 @@ public class ObjectBoxPerfTest extends PerfTest {
 
         stopBenchmark();
         log("Entities found: " + result.size());
-        //assertGreaterOrEqualToNumberOfEntities(entitiesFound);
     }
 
     private List<SimpleEntity> prepareAndPutEntities(boolean scalarsOnly) {
@@ -283,7 +282,6 @@ public class ObjectBoxPerfTest extends PerfTest {
         log("Prepared test data: " + box.count() + " objects");
         stopBenchmark();
 
-        //assertEntityCount(box.count());
         return entities;
     }
 
@@ -329,8 +327,6 @@ public class ObjectBoxPerfTest extends PerfTest {
         startBenchmark("insert");
         boxIndexed.put(entities);
         stopBenchmark();
-
-        //assertEntityCount(boxIndexed.count());
 
         return entities;
     }

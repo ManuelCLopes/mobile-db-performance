@@ -20,6 +20,7 @@ import android.content.Context;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import io.objectbox.performanceapp.PerfTest;
 import io.objectbox.performanceapp.PerfTestRunner;
@@ -43,9 +44,9 @@ public class RealmPerfTest extends PerfTest {
         Realm.init(context);
         realm = Realm.getDefaultInstance();
 
-        RealmConfiguration configuration = realm.getConfiguration();
+        //RealmConfiguration configuration = realm.getConfiguration();
         realm.close();
-        Realm.deleteRealm(configuration);
+        //Realm.deleteRealm(configuration);
         realm = Realm.getDefaultInstance();
 
         if (!versionLoggedOnce) {
@@ -72,11 +73,8 @@ public class RealmPerfTest extends PerfTest {
             case TestType.QUERY_STRING_INDEXED:
                 runQueryByStringIndexed();
                 break;
-            case TestType.QUERY_ID:
-                runQueryById(false);
-                break;
             case TestType.QUERY_ID_RANDOM:
-                runQueryById(true);
+                runQueryById();
                 break;
         }
     }
@@ -105,6 +103,7 @@ public class RealmPerfTest extends PerfTest {
         realm.commitTransaction();
         stopBenchmark();
 
+        /*
         //noinspection UnusedAssignment
         list = null;
 
@@ -121,6 +120,7 @@ public class RealmPerfTest extends PerfTest {
         reloaded.deleteAllFromRealm();
         realm.commitTransaction();
         stopBenchmark();
+         */
     }
 
     protected void setRandomValues(SimpleEntity entity) {
@@ -150,22 +150,6 @@ public class RealmPerfTest extends PerfTest {
         return entity;
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    protected void accessAll(List<SimpleEntity> list) {
-        for (SimpleEntity entity : list) {
-            entity.getId();
-            entity.getSimpleBoolean();
-            entity.getSimpleByte();
-            entity.getSimpleShort();
-            entity.getSimpleInt();
-            entity.getSimpleLong();
-            entity.getSimpleFloat();
-            entity.getSimpleDouble();
-            entity.getSimpleString();
-            entity.getSimpleByteArray();
-        }
-    }
-
     public void runBatchPerfTestIndexed() {
         List<SimpleEntityIndexed> list = new ArrayList<>(numberEntities);
         for (int i = 0; i < numberEntities; i++) {
@@ -186,6 +170,7 @@ public class RealmPerfTest extends PerfTest {
         realm.commitTransaction();
         stopBenchmark();
 
+        /*
         //noinspection UnusedAssignment
         list = null;
 
@@ -202,6 +187,8 @@ public class RealmPerfTest extends PerfTest {
         reloaded.deleteAllFromRealm();
         realm.commitTransaction();
         stopBenchmark();
+
+         */
     }
 
     protected void setRandomValues(SimpleEntityIndexed entity) {
@@ -223,51 +210,13 @@ public class RealmPerfTest extends PerfTest {
         return entity;
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    protected void accessAllIndexed(List<SimpleEntityIndexed> list) {
-        for (SimpleEntityIndexed entity : list) {
-            entity.getId();
-            entity.getSimpleBoolean();
-            entity.getSimpleByte();
-            entity.getSimpleShort();
-            entity.getSimpleInt();
-            entity.getSimpleLong();
-            entity.getSimpleFloat();
-            entity.getSimpleDouble();
-            entity.getSimpleString();
-            entity.getSimpleByteArray();
-        }
-    }
-
     private void runQueryByString() {
-        if (numberEntities > 100000000) {
-            log("Reduce number of entities to 100000000 to avoid extremely long test runs");
-            return;
-        }
-        List<SimpleEntity> entities = new ArrayList<>(numberEntities);
-        for (int i = 0; i < numberEntities; i++) {
-            entities.add(createEntity(i, false));
-        }
-
-        startBenchmark("insert");
-        realm.beginTransaction();
-        realm.insert(entities);
-        realm.commitTransaction();
-        stopBenchmark();
-
-        final String[] stringsToLookup = new String[numberEntities];
-        for (int i = 0; i < numberEntities; i++) {
-            String text = "";
-            while (text.length() < 2) {
-                text = entities.get(random.nextInt(numberEntities)).getSimpleString();
-            }
-            stringsToLookup[i] = text;
-        }
+        String s = Objects.requireNonNull(realm.where(SimpleEntity.class).equalTo("id", 1).findFirst()).getSimpleString();
 
         startBenchmark("query");
         long entitiesFound = 0;
         for (int i = 0; i < numberEntities; i++) {
-            List<SimpleEntity> result = realm.where(SimpleEntity.class).equalTo("simpleString", stringsToLookup[i]).findAll();
+            List<SimpleEntity> result = realm.where(SimpleEntity.class).equalTo("simpleString", s).findAll();
             accessAll(result);
             entitiesFound += result.size();
         }
@@ -276,30 +225,12 @@ public class RealmPerfTest extends PerfTest {
     }
 
     private void runQueryByStringIndexed() {
-        List<SimpleEntityIndexed> entities = new ArrayList<>(numberEntities);
-        for (int i = 0; i < numberEntities; i++) {
-            entities.add(createEntityIndexed(i));
-        }
-
-        startBenchmark("insert");
-        realm.beginTransaction();
-        realm.insert(entities);
-        realm.commitTransaction();
-        stopBenchmark();
-
-        final String[] stringsToLookup = new String[numberEntities];
-        for (int i = 0; i < numberEntities; i++) {
-            String text = "";
-            while (text.length() < 2) {
-                text = entities.get(random.nextInt(numberEntities)).getSimpleString();
-            }
-            stringsToLookup[i] = text;
-        }
+        String s = Objects.requireNonNull(realm.where(SimpleEntityIndexed.class).equalTo("id", 1).findFirst()).getSimpleString();
 
         startBenchmark("query");
         long entitiesFound = 0;
         for (int i = 0; i < numberEntities; i++) {
-            List<SimpleEntityIndexed> result = realm.where(SimpleEntityIndexed.class).equalTo("simpleString", stringsToLookup[i]).findAll();
+            List<SimpleEntityIndexed> result = realm.where(SimpleEntityIndexed.class).equalTo("simpleString", s).findAll();
             accessAllIndexed(result);
             entitiesFound += result.size();
         }
@@ -307,29 +238,13 @@ public class RealmPerfTest extends PerfTest {
         log("Entities found: " + entitiesFound);
     }
 
-    private void runQueryById(boolean randomIds) {
-        List<SimpleEntity> entities = new ArrayList<>(numberEntities);
-        for (int i = 0; i < numberEntities; i++) {
-            entities.add(createEntity(i, false));
-        }
-
-        startBenchmark("insert");
-        realm.beginTransaction();
-        realm.insert(entities);
-        realm.commitTransaction();
-        stopBenchmark();
-
-        long[] idsToLookup = new long[numberEntities];
-        for (int i = 0; i < numberEntities; i++) {
-            idsToLookup[i] = randomIds ? random.nextInt(numberEntities) : i;
-        }
+    private void runQueryById() {
+        int i = random.nextInt((int) realm.where(SimpleEntity.class).count());
 
         startBenchmark("query");
-        for (int i = 0; i < numberEntities; i++) {
-            SimpleEntity entity = realm.where(SimpleEntity.class).equalTo("id", idsToLookup[i]).findFirst();
-            assert entity != null;
-            accessAll(entity);
-        }
+        SimpleEntity entity = realm.where(SimpleEntity.class).equalTo("id", i).findFirst();
+        assert entity != null;
+        accessAll(entity);
         stopBenchmark();
     }
 
@@ -347,11 +262,43 @@ public class RealmPerfTest extends PerfTest {
         entity.getSimpleByteArray();
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    protected void accessAll(List<SimpleEntity> list) {
+        for (SimpleEntity entity : list) {
+            entity.getId();
+            entity.getSimpleBoolean();
+            entity.getSimpleByte();
+            entity.getSimpleShort();
+            entity.getSimpleInt();
+            entity.getSimpleLong();
+            entity.getSimpleFloat();
+            entity.getSimpleDouble();
+            entity.getSimpleString();
+            entity.getSimpleByteArray();
+        }
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    protected void accessAllIndexed(List<SimpleEntityIndexed> list) {
+        for (SimpleEntityIndexed entity : list) {
+            entity.getId();
+            entity.getSimpleBoolean();
+            entity.getSimpleByte();
+            entity.getSimpleShort();
+            entity.getSimpleInt();
+            entity.getSimpleLong();
+            entity.getSimpleFloat();
+            entity.getSimpleDouble();
+            entity.getSimpleString();
+            entity.getSimpleByteArray();
+        }
+    }
+
     @Override
     public void tearDown() {
-        RealmConfiguration configuration = realm.getConfiguration();
+        //RealmConfiguration configuration = realm.getConfiguration();
         realm.close();
-        Realm.deleteRealm(configuration);
+        //Realm.deleteRealm(configuration);
     }
 
 }
