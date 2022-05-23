@@ -138,7 +138,6 @@ public class PerfTestRunner {
         test.setNumberEntities(numberEntities);
         Benchmark benchmark = createBenchmark(type, test, numberEntities);
         test.setBenchmark(benchmark);
-        log("\nStarting tests with " + numberEntities + " entities at " + new Date());
         for (int i = 1; i <= runs; i++) {
             log("\n" + test.name() + " " + type + " (" + i + "/" + runs + ")\n" +
                     "------------------------------");

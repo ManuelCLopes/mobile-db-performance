@@ -67,9 +67,18 @@ public class ObjectBoxPerfTest extends PerfTest {
 
     @Override
     public void run(TestType type) {
-        log("Prepared test data: " + box.count() + " objects");
+        log("Current data on db: " + box.count() + " objects");
 
         switch (type.name) {
+            case TestType.CREATE_UPDATE:
+                runCreateUpdateTest(false);
+                break;
+            case TestType.CREATE_UPDATE_SCALARS:
+                runCreateUpdateTest(true);
+                break;
+            case TestType.CREATE_UPDATE_INDEXED:
+                runCreateUpdateIndexedTest();
+                break;
             case TestType.CRUD:
                 runBatchPerfTest(false);
                 break;
@@ -97,7 +106,45 @@ public class ObjectBoxPerfTest extends PerfTest {
             case TestType.QUERY_ID_RANDOM:
                 runQueryById(true);
                 break;
+            case TestType.DELETE_ALL:
+                runDeleteAll();
+                break;
         }
+    }
+
+    public void runDeleteAll(){
+        startBenchmark("delete all");
+        box.removeAll();
+        stopBenchmark();
+
+        store.close();
+        store.deleteAllFiles();
+    }
+
+    public void runCreateUpdateTest(boolean scalarsOnly){
+        List<SimpleEntity> list = prepareAndPutEntities(scalarsOnly);
+
+        for (SimpleEntity entity : list) {
+            if (scalarsOnly) {
+                setRandomScalars(entity);
+            } else {
+                setRandomValues(entity);
+            }
+        }
+        startBenchmark("update");
+        box.put(list);
+        stopBenchmark();
+    }
+
+    public void runCreateUpdateIndexedTest(){
+        List<SimpleEntityIndexed> list = prepareAndPutEntitiesIndexed();
+
+        for (SimpleEntityIndexed entity : list) {
+            setRandomValues(entity);
+        }
+        startBenchmark("update");
+        boxIndexed.put(list);
+        stopBenchmark();
     }
 
     public void runBatchPerfTest(boolean scalarsOnly) {
@@ -114,25 +161,20 @@ public class ObjectBoxPerfTest extends PerfTest {
         box.put(list);
         stopBenchmark();
 
-        //noinspection UnusedAssignment
-        list = null;
-
-        /*
         startBenchmark("load");
         List<SimpleEntity> reloaded = box.getAll();
         stopBenchmark();
-        */
-        //assertEntityCount(reloaded.size());
 
-        /*
         startBenchmark("access");
         accessAll(reloaded);
         stopBenchmark();
-        */
-        /*
-        startBenchmark("delete");
+
+        startBenchmark("delete all");
         box.remove(reloaded);
-        stopBenchmark();*/
+        stopBenchmark();
+
+        store.close();
+        store.deleteAllFiles();
     }
 
     protected void setRandomValues(SimpleEntity entity) {
@@ -187,9 +229,6 @@ public class ObjectBoxPerfTest extends PerfTest {
         boxIndexed.put(list);
         stopBenchmark();
 
-        //noinspection UnusedAssignment
-        list = null;
-
         startBenchmark("load");
         List<SimpleEntityIndexed> reloaded = boxIndexed.getAll();
         stopBenchmark();
@@ -198,7 +237,7 @@ public class ObjectBoxPerfTest extends PerfTest {
         accessAllIndexed(reloaded);
         stopBenchmark();
 
-        startBenchmark("delete");
+        startBenchmark("delete all");
         boxIndexed.remove(reloaded);
         stopBenchmark();
     }
@@ -279,7 +318,7 @@ public class ObjectBoxPerfTest extends PerfTest {
 
         startBenchmark("insert");
         box.put(entities);
-        log("Prepared test data: " + box.count() + " objects");
+        log("Test data inserted: " + box.count() + " objects");
         stopBenchmark();
 
         return entities;

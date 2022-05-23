@@ -16,10 +16,13 @@
 
 package io.objectbox.performanceapp;
 
-/**
- * Created by Markus on 01.10.2016.
- */
+
+import androidx.annotation.NonNull;
+
 public class TestType {
+    public static final String CREATE_UPDATE = "Create & Update";
+    public static final String CREATE_UPDATE_SCALARS = "Create & Update - scalars";
+    public static final String CREATE_UPDATE_INDEXED = "Create & Update - indexed";
     public static final String CRUD = "Basic operations (CRUD)";
     public static final String CRUD_SCALARS = "Basic operations (CRUD) - scalars";
     public static final String CRUD_INDEXED = "Basic operations (CRUD) - indexed";
@@ -29,8 +32,13 @@ public class TestType {
     public static final String QUERY_INTEGER_INDEXED = "Query by integer - indexed";
     public static final String QUERY_ID = "Query by ID";
     public static final String QUERY_ID_RANDOM = "Query by ID - random";
+    public static final String DELETE_ALL = "Delete All";
+
 
     public static TestType[] ALL = {
+            new TestType(CREATE_UPDATE, "create-update"),
+            new TestType(CREATE_UPDATE_SCALARS, "create-update-scalars"),
+            new TestType(CREATE_UPDATE_INDEXED, "create-update-indexed"),
             new TestType(CRUD, "crud"),
             new TestType(CRUD_SCALARS, "crud-scalars"),
             new TestType(CRUD_INDEXED, "crud-indexed"),
@@ -40,6 +48,7 @@ public class TestType {
             new TestType(QUERY_INTEGER_INDEXED, "query-integer-indexed"),
             new TestType(QUERY_ID, "query-id"),
             new TestType(QUERY_ID_RANDOM, "query-id-random"),
+            new TestType(DELETE_ALL, "delete-all"),
     };
 
     public final String name;
@@ -50,6 +59,7 @@ public class TestType {
         this.nameShort = nameShort;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return name;
