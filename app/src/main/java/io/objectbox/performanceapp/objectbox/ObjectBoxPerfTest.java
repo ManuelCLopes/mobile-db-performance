@@ -19,7 +19,7 @@ package io.objectbox.performanceapp.objectbox;
 import android.content.Context;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import io.objectbox.Box;
@@ -101,10 +101,7 @@ public class ObjectBoxPerfTest extends PerfTest {
                 runQueryByIntegerIndexed();
                 break;
             case TestType.QUERY_ID:
-                runQueryById(false);
-                break;
-            case TestType.QUERY_ID_RANDOM:
-                runQueryById(true);
+                runQueryById();
                 break;
             case TestType.DELETE_ALL:
                 runDeleteAll();
@@ -370,21 +367,11 @@ public class ObjectBoxPerfTest extends PerfTest {
         return entities;
     }
 
-    private void runQueryById(boolean randomIds) {
-        prepareAndPutEntities(false);
-
-        final long[] idsToLookup = new long[numberEntities];
-        for (int i = 0; i < numberEntities; i++) {
-            idsToLookup[i] = randomIds ? 1 + random.nextInt(numberEntities) : 1 + i;
-        }
+    private void runQueryById() {
+        int i = random.nextInt((int) box.count());
 
         benchmark("query", () -> {
-            List<SimpleEntity> results = box.get(idsToLookup);
-            if (results.size() != idsToLookup.length) {
-                throw new IllegalStateException("result count " + results.size()
-                        + " is not " + idsToLookup.length);
-            }
-            accessAll(results);
+            SimpleEntity results = box.get(i);
         });
     }
 

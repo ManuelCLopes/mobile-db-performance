@@ -58,6 +58,15 @@ public class RealmPerfTest extends PerfTest {
     @Override
     public void run(TestType type) {
         switch (type.name) {
+            case TestType.CREATE_UPDATE:
+                runCreateUpdateTest(false);
+                break;
+            case TestType.CREATE_UPDATE_SCALARS:
+                runCreateUpdateTest(true);
+                break;
+            case TestType.CREATE_UPDATE_INDEXED:
+                runCreateUpdateIndexedTest();
+                break;
             case TestType.CRUD:
                 runBatchPerfTest(false);
                 break;
@@ -73,13 +82,31 @@ public class RealmPerfTest extends PerfTest {
             case TestType.QUERY_STRING_INDEXED:
                 runQueryByStringIndexed();
                 break;
-            case TestType.QUERY_ID_RANDOM:
+            case TestType.QUERY_INTEGER:
+                runQueryByInteger();
+                break;
+            case TestType.QUERY_ID:
                 runQueryById();
+                break;
+            case TestType.DELETE_ALL:
+                runDeleteAll();
                 break;
         }
     }
 
-    public void runBatchPerfTest(boolean scalarsOnly) {
+    public void runDeleteAll(){
+        startBenchmark("delete all");
+        realm.beginTransaction();
+        realm.deleteAll();
+        realm.commitTransaction();
+        stopBenchmark();
+
+        RealmConfiguration configuration = realm.getConfiguration();
+        realm.close();
+        Realm.deleteRealm(configuration);
+    }
+
+    public void runCreateUpdateTest(boolean scalarsOnly){
         List<SimpleEntity> list = new ArrayList<>(numberEntities);
         for (int i = 0; i < numberEntities; i++) {
             list.add(createEntity(i, scalarsOnly));
@@ -102,10 +129,32 @@ public class RealmPerfTest extends PerfTest {
         realm.insertOrUpdate(list);
         realm.commitTransaction();
         stopBenchmark();
+    }
 
-        /*
-        //noinspection UnusedAssignment
-        list = null;
+    public void runCreateUpdateIndexedTest(){
+        List<SimpleEntityIndexed> list = new ArrayList<>(numberEntities);
+        for (int i = 0; i < numberEntities; i++) {
+            list.add(createEntityIndexed(i));
+        }
+        startBenchmark("insert");
+        realm.beginTransaction();
+        realm.insert(list);
+        realm.commitTransaction();
+        stopBenchmark();
+
+        for (SimpleEntityIndexed entity : list) {
+            setRandomValues(entity);
+        }
+        startBenchmark("update");
+        realm.beginTransaction();
+        realm.insertOrUpdate(list);
+        realm.commitTransaction();
+        stopBenchmark();
+    }
+
+
+    public void runBatchPerfTest(boolean scalarsOnly) {
+        runCreateUpdateTest(scalarsOnly);
 
         startBenchmark("load");
         RealmResults<SimpleEntity> reloaded = realm.where(SimpleEntity.class).findAll();
@@ -115,12 +164,11 @@ public class RealmPerfTest extends PerfTest {
         accessAll(reloaded);
         stopBenchmark();
 
-        startBenchmark("delete");
+        startBenchmark("delete all");
         realm.beginTransaction();
         reloaded.deleteAllFromRealm();
         realm.commitTransaction();
         stopBenchmark();
-         */
     }
 
     protected void setRandomValues(SimpleEntity entity) {
@@ -151,28 +199,7 @@ public class RealmPerfTest extends PerfTest {
     }
 
     public void runBatchPerfTestIndexed() {
-        List<SimpleEntityIndexed> list = new ArrayList<>(numberEntities);
-        for (int i = 0; i < numberEntities; i++) {
-            list.add(createEntityIndexed(i));
-        }
-        startBenchmark("insert");
-        realm.beginTransaction();
-        realm.insert(list);
-        realm.commitTransaction();
-        stopBenchmark();
-
-        for (SimpleEntityIndexed entity : list) {
-            setRandomValues(entity);
-        }
-        startBenchmark("update");
-        realm.beginTransaction();
-        realm.insertOrUpdate(list);
-        realm.commitTransaction();
-        stopBenchmark();
-
-        /*
-        //noinspection UnusedAssignment
-        list = null;
+        runCreateUpdateIndexedTest();
 
         startBenchmark("load");
         RealmResults<SimpleEntityIndexed> reloaded = realm.where(SimpleEntityIndexed.class).findAll();
@@ -187,8 +214,6 @@ public class RealmPerfTest extends PerfTest {
         reloaded.deleteAllFromRealm();
         realm.commitTransaction();
         stopBenchmark();
-
-         */
     }
 
     protected void setRandomValues(SimpleEntityIndexed entity) {
@@ -238,8 +263,19 @@ public class RealmPerfTest extends PerfTest {
         log("Entities found: " + entitiesFound);
     }
 
+    private void runQueryByInteger() {
+        int i = Objects.requireNonNull(realm.where(SimpleEntity.class).findFirst()).getSimpleInt();
+
+        startBenchmark("query");
+        List<SimpleEntity> result = realm.where(SimpleEntity.class).equalTo("simpleInt", i).findAll();
+        accessAll(result);
+
+        stopBenchmark();
+        log("Entities found: " + result.size());
+    }
+
     private void runQueryById() {
-        int i = random.nextInt((int) realm.where(SimpleEntity.class).count());
+        int i = random.nextInt((int) realm.where(SimpleEntity.class).count()) ;
 
         startBenchmark("query");
         SimpleEntity entity = realm.where(SimpleEntity.class).equalTo("id", i).findFirst();

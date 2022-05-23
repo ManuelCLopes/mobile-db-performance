@@ -31,7 +31,6 @@ public class TestType {
     public static final String QUERY_INTEGER = "Query by integer";
     public static final String QUERY_INTEGER_INDEXED = "Query by integer - indexed";
     public static final String QUERY_ID = "Query by ID";
-    public static final String QUERY_ID_RANDOM = "Query by ID - random";
     public static final String DELETE_ALL = "Delete All";
 
 
@@ -47,7 +46,6 @@ public class TestType {
             new TestType(QUERY_INTEGER, "query-integer"),
             new TestType(QUERY_INTEGER_INDEXED, "query-integer-indexed"),
             new TestType(QUERY_ID, "query-id"),
-            new TestType(QUERY_ID_RANDOM, "query-id-random"),
             new TestType(DELETE_ALL, "delete-all"),
     };
 

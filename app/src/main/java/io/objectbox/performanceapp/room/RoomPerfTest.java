@@ -74,9 +74,6 @@ public class RoomPerfTest extends PerfTest {
             case TestType.QUERY_ID:
                 runQueryById(false);
                 break;
-            case TestType.QUERY_ID_RANDOM:
-                runQueryById(true);
-                break;
         }
     }
 
