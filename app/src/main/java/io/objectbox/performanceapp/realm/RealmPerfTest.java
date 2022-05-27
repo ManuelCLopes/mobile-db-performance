@@ -68,13 +68,13 @@ public class RealmPerfTest extends PerfTest {
                 runCreateUpdateIndexedTest();
                 break;
             case TestType.CRUD:
-                runBatchPerfTest(false);
+                runCRUDTest(false);
                 break;
             case TestType.CRUD_SCALARS:
-                runBatchPerfTest(true);
+                runCRUDTest(true);
                 break;
             case TestType.CRUD_INDEXED:
-                runBatchPerfTestIndexed();
+                runCRUDTestIndexed();
                 break;
             case TestType.QUERY_STRING:
                 runQueryByString();
@@ -84,6 +84,9 @@ public class RealmPerfTest extends PerfTest {
                 break;
             case TestType.QUERY_INTEGER:
                 runQueryByInteger();
+                break;
+            case TestType.QUERY_INTEGER_INDEXED:
+                runQueryByIntegerIndexed();
                 break;
             case TestType.QUERY_ID:
                 runQueryById();
@@ -152,8 +155,7 @@ public class RealmPerfTest extends PerfTest {
         stopBenchmark();
     }
 
-
-    public void runBatchPerfTest(boolean scalarsOnly) {
+    public void runCRUDTest(boolean scalarsOnly) {
         runCreateUpdateTest(scalarsOnly);
 
         startBenchmark("load");
@@ -198,7 +200,7 @@ public class RealmPerfTest extends PerfTest {
         return entity;
     }
 
-    public void runBatchPerfTestIndexed() {
+    public void runCRUDTestIndexed() {
         runCreateUpdateIndexedTest();
 
         startBenchmark("load");
@@ -239,28 +241,22 @@ public class RealmPerfTest extends PerfTest {
         String s = Objects.requireNonNull(realm.where(SimpleEntity.class).equalTo("id", 1).findFirst()).getSimpleString();
 
         startBenchmark("query");
-        long entitiesFound = 0;
-        for (int i = 0; i < numberEntities; i++) {
-            List<SimpleEntity> result = realm.where(SimpleEntity.class).equalTo("simpleString", s).findAll();
-            accessAll(result);
-            entitiesFound += result.size();
-        }
+        List<SimpleEntity> result = realm.where(SimpleEntity.class).equalTo("simpleString", s).findAll();
+        accessAll(result);
+
         stopBenchmark();
-        log("Entities found: " + entitiesFound);
+        log("Entities found: " + result.size());
     }
 
     private void runQueryByStringIndexed() {
         String s = Objects.requireNonNull(realm.where(SimpleEntityIndexed.class).equalTo("id", 1).findFirst()).getSimpleString();
 
         startBenchmark("query");
-        long entitiesFound = 0;
-        for (int i = 0; i < numberEntities; i++) {
-            List<SimpleEntityIndexed> result = realm.where(SimpleEntityIndexed.class).equalTo("simpleString", s).findAll();
-            accessAllIndexed(result);
-            entitiesFound += result.size();
-        }
+        List<SimpleEntityIndexed> result = realm.where(SimpleEntityIndexed.class).equalTo("simpleString", s).findAll();
+        accessAllIndexed(result);
+
         stopBenchmark();
-        log("Entities found: " + entitiesFound);
+        log("Entities found: " + result.size());
     }
 
     private void runQueryByInteger() {
@@ -272,6 +268,18 @@ public class RealmPerfTest extends PerfTest {
 
         stopBenchmark();
         log("Entities found: " + result.size());
+    }
+
+    private void runQueryByIntegerIndexed(){
+        int i = Objects.requireNonNull(realm.where(SimpleEntityIndexed.class).findFirst()).getSimpleInt();
+
+        startBenchmark("query");
+        List<SimpleEntityIndexed> result = realm.where(SimpleEntityIndexed.class).equalTo("simpleInt", i).findAll();
+        accessAllIndexed(result);
+
+        stopBenchmark();
+        log("Entities found: " + result.size());
+
     }
 
     private void runQueryById() {

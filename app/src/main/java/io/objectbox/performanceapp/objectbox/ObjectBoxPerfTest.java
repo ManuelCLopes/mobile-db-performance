@@ -110,8 +110,12 @@ public class ObjectBoxPerfTest extends PerfTest {
     }
 
     public void runDeleteAll(){
-        startBenchmark("delete all");
+        startBenchmark("delete");
         box.removeAll();
+        stopBenchmark();
+
+        startBenchmark("delete indexed");
+        boxIndexed.removeAll();
         stopBenchmark();
 
         store.close();
