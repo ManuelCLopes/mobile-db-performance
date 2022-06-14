@@ -86,16 +86,4 @@ public abstract class PerfTest {
     public void allTestsComplete() {
     }
 
-    protected void assertEntityCount(long size) {
-        if (size != numberEntities) {
-            throw new IllegalStateException("Expected " + numberEntities + " but actual number is " + size);
-        }
-    }
-
-    protected void assertGreaterOrEqualToNumberOfEntities(long count) {
-        if (count < numberEntities) {
-            throw new IllegalStateException("Expected at least " + numberEntities + " but actual number is " + count);
-        }
-    }
-
 }

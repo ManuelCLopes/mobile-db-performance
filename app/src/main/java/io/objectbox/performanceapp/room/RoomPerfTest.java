@@ -221,12 +221,11 @@ public class RoomPerfTest extends PerfTest {
         int i = 5;
 
         startBenchmark("query");
-        List<SimpleEntityIndexed> result = daoIndexed.whereSimpleIntEq(5);
+        List<SimpleEntityIndexed> result = daoIndexed.whereSimpleIntEq(i);
         accessAllIndexed(result);
 
         stopBenchmark();
         log("Entities found: " + result.size());
-        assertGreaterOrEqualToNumberOfEntities(result.size());
     }
 
     private void runQueryById() {
