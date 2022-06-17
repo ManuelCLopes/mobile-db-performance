@@ -59,19 +59,13 @@ public class RealmPerfTest extends PerfTest {
     public void run(TestType type) {
         switch (type.name) {
             case TestType.CREATE_UPDATE:
-                runCreateUpdateTest(false);
-                break;
-            case TestType.CREATE_UPDATE_SCALARS:
-                runCreateUpdateTest(true);
+                runCreateUpdateTest();
                 break;
             case TestType.CREATE_UPDATE_INDEXED:
                 runCreateUpdateIndexedTest();
                 break;
             case TestType.CRUD:
-                runCRUDTest(false);
-                break;
-            case TestType.CRUD_SCALARS:
-                runCRUDTest(true);
+                runCRUDTest();
                 break;
             case TestType.CRUD_INDEXED:
                 runCRUDTestIndexed();
@@ -109,10 +103,10 @@ public class RealmPerfTest extends PerfTest {
         Realm.deleteRealm(configuration);
     }
 
-    public void runCreateUpdateTest(boolean scalarsOnly){
+    public void runCreateUpdateTest(){
         List<SimpleEntity> list = new ArrayList<>(numberEntities);
         for (int i = 0; i < numberEntities; i++) {
-            list.add(createEntity(i, scalarsOnly));
+            list.add(createEntity(i));
         }
         startBenchmark("insert");
         realm.beginTransaction();
@@ -121,11 +115,8 @@ public class RealmPerfTest extends PerfTest {
         stopBenchmark();
 
         for (SimpleEntity entity : list) {
-            if (scalarsOnly) {
-                setRandomScalars(entity);
-            } else {
-                setRandomValues(entity);
-            }
+            setRandomValues(entity);
+
         }
         startBenchmark("update");
         realm.beginTransaction();
@@ -155,8 +146,8 @@ public class RealmPerfTest extends PerfTest {
         stopBenchmark();
     }
 
-    public void runCRUDTest(boolean scalarsOnly) {
-        runCreateUpdateTest(scalarsOnly);
+    public void runCRUDTest() {
+        runCreateUpdateTest();
 
         startBenchmark("load");
         RealmResults<SimpleEntity> reloaded = realm.where(SimpleEntity.class).findAll();
@@ -189,14 +180,11 @@ public class RealmPerfTest extends PerfTest {
         entity.setSimpleFloat(random.nextFloat());
     }
 
-    public SimpleEntity createEntity(long id, boolean scalarsOnly) {
+    public SimpleEntity createEntity(long id) {
         SimpleEntity entity = new SimpleEntity();
         entity.setId(id);
-        if (scalarsOnly) {
-            setRandomScalars(entity);
-        } else {
-            setRandomValues(entity);
-        }
+        setRandomValues(entity);
+
         return entity;
     }
 

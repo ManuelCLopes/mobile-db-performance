@@ -71,19 +71,13 @@ public class ObjectBoxPerfTest extends PerfTest {
 
         switch (type.name) {
             case TestType.CREATE_UPDATE:
-                runCreateUpdateTest(false);
-                break;
-            case TestType.CREATE_UPDATE_SCALARS:
-                runCreateUpdateTest(true);
+                runCreateUpdateTest();
                 break;
             case TestType.CREATE_UPDATE_INDEXED:
                 runCreateUpdateIndexedTest();
                 break;
             case TestType.CRUD:
-                runBatchPerfTest(false);
-                break;
-            case TestType.CRUD_SCALARS:
-                runBatchPerfTest(true);
+                runBatchPerfTest();
                 break;
             case TestType.CRUD_INDEXED:
                 runBatchPerfTestIndexed();
@@ -122,15 +116,12 @@ public class ObjectBoxPerfTest extends PerfTest {
         store.deleteAllFiles();
     }
 
-    public void runCreateUpdateTest(boolean scalarsOnly){
-        List<SimpleEntity> list = prepareAndPutEntities(scalarsOnly);
+    public void runCreateUpdateTest(){
+        List<SimpleEntity> list = prepareAndPutEntities();
 
         for (SimpleEntity entity : list) {
-            if (scalarsOnly) {
-                setRandomScalars(entity);
-            } else {
-                setRandomValues(entity);
-            }
+            setRandomValues(entity);
+
         }
         startBenchmark("update");
         box.put(list);
@@ -148,15 +139,12 @@ public class ObjectBoxPerfTest extends PerfTest {
         stopBenchmark();
     }
 
-    public void runBatchPerfTest(boolean scalarsOnly) {
-        List<SimpleEntity> list = prepareAndPutEntities(scalarsOnly);
+    public void runBatchPerfTest() {
+        List<SimpleEntity> list = prepareAndPutEntities();
 
         for (SimpleEntity entity : list) {
-            if (scalarsOnly) {
-                setRandomScalars(entity);
-            } else {
-                setRandomValues(entity);
-            }
+            setRandomValues(entity);
+
         }
         startBenchmark("update");
         box.put(list);
@@ -194,13 +182,10 @@ public class ObjectBoxPerfTest extends PerfTest {
         entity.setSimpleFloat(random.nextFloat());
     }
 
-    public SimpleEntity createEntity(boolean scalarsOnly) {
+    public SimpleEntity createEntity() {
         SimpleEntity entity = new SimpleEntity();
-        if (scalarsOnly) {
-            setRandomScalars(entity);
-        } else {
-            setRandomValues(entity);
-        }
+        setRandomValues(entity);
+
         return entity;
     }
 
@@ -311,10 +296,10 @@ public class ObjectBoxPerfTest extends PerfTest {
         log("Entities found: " + result.size());
     }
 
-    private List<SimpleEntity> prepareAndPutEntities(boolean scalarsOnly) {
+    private List<SimpleEntity> prepareAndPutEntities() {
         List<SimpleEntity> entities = new ArrayList<>(numberEntities);
         for (int i = 0; i < numberEntities; i++) {
-            entities.add(createEntity(scalarsOnly));
+            entities.add(createEntity());
         }
 
         startBenchmark("insert");

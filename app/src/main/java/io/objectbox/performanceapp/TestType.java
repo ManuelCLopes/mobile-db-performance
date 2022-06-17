@@ -21,10 +21,8 @@ import androidx.annotation.NonNull;
 
 public class TestType {
     public static final String CREATE_UPDATE = "Create & Update";
-    public static final String CREATE_UPDATE_SCALARS = "Create & Update - scalars";
     public static final String CREATE_UPDATE_INDEXED = "Create & Update - indexed";
     public static final String CRUD = "Basic operations (CRUD)";
-    public static final String CRUD_SCALARS = "Basic operations (CRUD) - scalars";
     public static final String CRUD_INDEXED = "Basic operations (CRUD) - indexed";
     public static final String QUERY_STRING = "Query by string";
     public static final String QUERY_STRING_INDEXED = "Query by string - indexed";
@@ -36,10 +34,8 @@ public class TestType {
 
     public static TestType[] ALL = {
             new TestType(CREATE_UPDATE, "create-update"),
-            new TestType(CREATE_UPDATE_SCALARS, "create-update-scalars"),
             new TestType(CREATE_UPDATE_INDEXED, "create-update-indexed"),
             new TestType(CRUD, "crud"),
-            new TestType(CRUD_SCALARS, "crud-scalars"),
             new TestType(CRUD_INDEXED, "crud-indexed"),
             new TestType(QUERY_STRING, "query-string"),
             new TestType(QUERY_STRING_INDEXED, "query-string-indexed"),

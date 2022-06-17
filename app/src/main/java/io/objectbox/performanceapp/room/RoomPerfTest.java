@@ -51,19 +51,13 @@ public class RoomPerfTest extends PerfTest {
     public void run(TestType type) {
         switch (type.name) {
             case TestType.CREATE_UPDATE:
-                runCreateUpdateTest(false);
-                break;
-            case TestType.CREATE_UPDATE_SCALARS:
-                runCreateUpdateTest(true);
+                runCreateUpdateTest();
                 break;
             case TestType.CREATE_UPDATE_INDEXED:
                 runCreateUpdateIndexedTest();
                 break;
             case TestType.CRUD:
-                runCRUDTest(false);
-                break;
-            case TestType.CRUD_SCALARS:
-                runCRUDTest(true);
+                runCRUDTest();
                 break;
             case TestType.CRUD_INDEXED:
                 runCRUDTestIndexed();
@@ -110,21 +104,17 @@ public class RoomPerfTest extends PerfTest {
         log("DB deleted: " + deleted);
     }
 
-    private void runCreateUpdateTest(boolean scalarsOnly) {
+    private void runCreateUpdateTest() {
         List<SimpleEntity> list = new ArrayList<>(numberEntities);
         for (int i = 0; i < numberEntities; i++) {
-            list.add(createEntity((long) i, scalarsOnly));
+            list.add(createEntity((long) i));
         }
         startBenchmark("insert");
         dao.insertInTx(list);
         stopBenchmark();
 
         for (SimpleEntity entity : list) {
-            if (scalarsOnly) {
-                setRandomScalars(entity);
-            } else {
-                setRandomValues(entity);
-            }
+            setRandomValues(entity);
         }
         startBenchmark("update");
         dao.updateInTx(list);
@@ -148,8 +138,8 @@ public class RoomPerfTest extends PerfTest {
         stopBenchmark();
     }
 
-    private void runCRUDTest(boolean scalarsOnly) {
-        runCreateUpdateTest(scalarsOnly);
+    private void runCRUDTest() {
+        runCreateUpdateTest();
 
         startBenchmark("load");
         List<SimpleEntity> reloaded = dao.loadAll();
@@ -194,7 +184,7 @@ public class RoomPerfTest extends PerfTest {
     }
 
     private void runQueryByStringIndexed() {
-        String s = "a";
+        String s = daoIndexed.loadAll().get(1).getSimpleString();
 
         startBenchmark("query");
         long entitiesFound = db.runInTransaction(() -> {
@@ -318,16 +308,13 @@ public class RoomPerfTest extends PerfTest {
         entity.setSimpleFloat(random.nextFloat());
     }
 
-    private SimpleEntity createEntity(Long key, boolean scalarsOnly) {
+    private SimpleEntity createEntity(Long key) {
         SimpleEntity entity = new SimpleEntity();
         if (key != null) {
             entity.setId(key);
         }
-        if (scalarsOnly) {
-            setRandomScalars(entity);
-        } else {
-            setRandomValues(entity);
-        }
+        setRandomValues(entity);
+
         return entity;
     }
 
