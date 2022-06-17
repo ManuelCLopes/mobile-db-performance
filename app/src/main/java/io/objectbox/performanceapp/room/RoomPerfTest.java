@@ -290,7 +290,7 @@ public class RoomPerfTest extends PerfTest {
         entity.setSimpleBoolean(random.nextBoolean());
         entity.setSimpleByte((byte) random.nextInt());
         entity.setSimpleShort((short) random.nextInt());
-        entity.setSimpleInt(random.nextInt());
+        entity.setSimpleInt(random.nextInt(1000));
         entity.setSimpleLong(random.nextLong());
         entity.setSimpleDouble(random.nextDouble());
         entity.setSimpleFloat(random.nextFloat());
@@ -302,7 +302,7 @@ public class RoomPerfTest extends PerfTest {
         entity.setSimpleBoolean(random.nextBoolean());
         entity.setSimpleByte((byte) random.nextInt());
         entity.setSimpleShort((short) random.nextInt());
-        entity.setSimpleInt(random.nextInt());
+        entity.setSimpleInt(random.nextInt(1000));
         entity.setSimpleLong(random.nextLong());
         entity.setSimpleDouble(random.nextDouble());
         entity.setSimpleFloat(random.nextFloat());
