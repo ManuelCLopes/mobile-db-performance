@@ -19,7 +19,6 @@ package io.objectbox.performanceapp.objectbox;
 import android.content.Context;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import io.objectbox.Box;
@@ -67,7 +66,7 @@ public class ObjectBoxPerfTest extends PerfTest {
 
     @Override
     public void run(TestType type) {
-        log("Current data on db: " + box.count() + " objects");
+        log("Current data on db: " + (box.count() + boxIndexed.count()) + " objects");
 
         switch (type.name) {
             case TestType.CREATE_UPDATE:
@@ -327,7 +326,7 @@ public class ObjectBoxPerfTest extends PerfTest {
     }
 
     private void runQueryByIntegerIndexed() {
-        int i = box.get(1).simpleInt;
+        int i = boxIndexed.get(1).getSimpleInt();
 
         startBenchmark("query");
 

@@ -104,8 +104,12 @@ public class RealmPerfTest extends PerfTest {
     }
 
     public void runCreateUpdateTest(){
+        int existentEntities = 0;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            existentEntities = realm.where(SimpleEntity.class).findAll().size();
+        }
         List<SimpleEntity> list = new ArrayList<>(numberEntities);
-        for (int i = 0; i < numberEntities; i++) {
+        for (int i = existentEntities; i < existentEntities + numberEntities; i++) {
             list.add(createEntity(i));
         }
         startBenchmark("insert");
@@ -126,8 +130,13 @@ public class RealmPerfTest extends PerfTest {
     }
 
     public void runCreateUpdateIndexedTest(){
+        int existentEntities = 0;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            existentEntities = realm.where(SimpleEntityIndexed.class).findAll().size();
+        }
+
         List<SimpleEntityIndexed> list = new ArrayList<>(numberEntities);
-        for (int i = 0; i < numberEntities; i++) {
+        for (int i = existentEntities; i < existentEntities + numberEntities; i++) {
             list.add(createEntityIndexed(i));
         }
         startBenchmark("insert");
