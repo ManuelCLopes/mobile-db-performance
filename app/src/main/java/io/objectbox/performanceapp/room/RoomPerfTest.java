@@ -28,10 +28,6 @@ public class RoomPerfTest extends PerfTest {
     @Override
     public void setUp(Context context, PerfTestRunner testRunner) {
         super.setUp(context, testRunner);
-        boolean deleted = context.deleteDatabase(DB_NAME);
-        if (deleted) {
-            log("DB existed before start - deleted");
-        }
         db = Room.databaseBuilder(context.getApplicationContext(), AppDatabase.class, DB_NAME)
                 .build();
         dao = db.simpleEntityDao();
@@ -105,8 +101,9 @@ public class RoomPerfTest extends PerfTest {
     }
 
     private void runCreateUpdateTest() {
+        int existentEntities = dao.count();
         List<SimpleEntity> list = new ArrayList<>(numberEntities);
-        for (int i = 0; i < numberEntities; i++) {
+        for (int i = existentEntities; i < existentEntities + numberEntities; i++) {
             list.add(createEntity((long) i));
         }
         startBenchmark("insert");
@@ -122,8 +119,9 @@ public class RoomPerfTest extends PerfTest {
     }
 
     private void runCreateUpdateIndexedTest(){
+        int existentEntities = daoIndexed.loadAll().size();
         List<SimpleEntityIndexed> list = new ArrayList<>(numberEntities);
-        for (int i = 0; i < numberEntities; i++) {
+        for (int i = existentEntities; i < existentEntities + numberEntities; i++) {
             list.add(createEntityIndexed((long) i));
         }
         startBenchmark("insert");
@@ -171,7 +169,7 @@ public class RoomPerfTest extends PerfTest {
     }
 
     private void runQueryByString() {
-        String s = dao.load(1).getSimpleString();
+        String s = dao.load(0).getSimpleString();
 
         startBenchmark("query");
         long entitiesFound = db.runInTransaction(() -> {
@@ -184,7 +182,7 @@ public class RoomPerfTest extends PerfTest {
     }
 
     private void runQueryByStringIndexed() {
-        String s = daoIndexed.loadAll().get(1).getSimpleString();
+        String s = daoIndexed.loadAll().get(0).getSimpleString();
 
         startBenchmark("query");
         long entitiesFound = db.runInTransaction(() -> {
@@ -208,7 +206,7 @@ public class RoomPerfTest extends PerfTest {
     }
 
     private void runQueryByIntegerIndexed() {
-        int i = 5;
+        int i = dao.load(1).getSimpleInt();
 
         startBenchmark("query");
         List<SimpleEntityIndexed> result = daoIndexed.whereSimpleIntEq(i);

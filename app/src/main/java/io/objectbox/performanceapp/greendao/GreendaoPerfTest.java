@@ -49,10 +49,7 @@ public class GreendaoPerfTest extends PerfTest {
 
     public void setUp(Context context, PerfTestRunner testRunner) {
         super.setUp(context, testRunner);
-        boolean deleted = context.deleteDatabase(DB_NAME);
-        if (deleted) {
-            log("DB existed before start - deleted");
-        }
+
         db = new DevOpenHelper(context, DB_NAME).getWritableDb();
         daoSession = new DaoMaster(db).newSession(IdentityScopeType.None);
         dao = daoSession.getSimpleEntityDao();
@@ -131,8 +128,9 @@ public class GreendaoPerfTest extends PerfTest {
     }
 
     private void runCreateUpdateTest() {
+        int existentEntities = (int) dao.count();
         List<SimpleEntity> list = new ArrayList<>(numberEntities);
-        for (int i = 0; i < numberEntities; i++) {
+        for (int i = existentEntities; i < existentEntities + numberEntities; i++) {
             list.add(createEntity((long) i));
         }
         startBenchmark("insert");
@@ -141,7 +139,6 @@ public class GreendaoPerfTest extends PerfTest {
 
         for (SimpleEntity entity : list) {
             setRandomValues(entity);
-
         }
         startBenchmark("update");
         dao.updateInTx(list);
@@ -149,8 +146,9 @@ public class GreendaoPerfTest extends PerfTest {
     }
 
     private void runCreateUpdateIndexedTest(){
+        int existentEntities = (int) daoIndexed.count();
         List<SimpleEntityIndexed> list = new ArrayList<>(numberEntities);
-        for (int i = 0; i < numberEntities; i++) {
+        for (int i = existentEntities; i < existentEntities + numberEntities; i++) {
             list.add(createEntityIndexed((long) i));
         }
         startBenchmark("insert");
@@ -281,7 +279,7 @@ public class GreendaoPerfTest extends PerfTest {
     }
 
     private void runQueryByString() {
-        String s = dao.queryBuilder().limit(1).build().list().get(1).getSimpleString();
+        String s = dao.queryBuilder().limit(1).build().list().get(0).getSimpleString();
 
         startBenchmark("query");
         Query<SimpleEntity> query = dao.queryBuilder().where(SimpleEntityDao.Properties.SimpleString.eq(s)).build();
@@ -295,12 +293,11 @@ public class GreendaoPerfTest extends PerfTest {
     }
 
     private void runQueryByStringIndexed() {
-        String s = daoIndexed.queryBuilder().limit(1).build().list().get(1).getSimpleString();
+        String s = daoIndexed.queryBuilder().limit(1).build().list().get(0).getSimpleString();
 
         startBenchmark("query");
         Query<SimpleEntityIndexed> query = daoIndexed.queryBuilder().where(Properties.SimpleString.eq(null)).build();
         db.beginTransaction();
-        query.setParameter(0, s);
         List<SimpleEntityIndexed> result = query.list();
         accessAllIndexed(result);
 
@@ -310,7 +307,7 @@ public class GreendaoPerfTest extends PerfTest {
     }
 
     private void runQueryByInteger(){
-        int i = dao.queryBuilder().limit(1).build().list().get(1).getSimpleInt();
+        int i = dao.queryBuilder().limit(1).build().list().get(0).getSimpleInt();
 
         startBenchmark("query");
         Query<SimpleEntity> query = dao.queryBuilder().where(SimpleEntityDao.Properties.SimpleInt.eq(i)).build();
@@ -324,7 +321,7 @@ public class GreendaoPerfTest extends PerfTest {
     }
 
     private void runQueryByIntegerIndexed(){
-        int i = daoIndexed.queryBuilder().limit(1).build().list().get(1).getSimpleInt();
+        int i = daoIndexed.queryBuilder().limit(1).build().list().get(0).getSimpleInt();
 
         startBenchmark("query");
         Query<SimpleEntityIndexed> query = daoIndexed.queryBuilder().where(SimpleEntityIndexedDao.Properties.SimpleInt.eq(i)).build();
@@ -363,7 +360,5 @@ public class GreendaoPerfTest extends PerfTest {
     @Override
     public void tearDown() {
         daoSession.getDatabase().close();
-
     }
-
 }
