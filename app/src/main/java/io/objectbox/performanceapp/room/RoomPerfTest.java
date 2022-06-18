@@ -206,7 +206,7 @@ public class RoomPerfTest extends PerfTest {
     }
 
     private void runQueryByIntegerIndexed() {
-        int i = dao.load(1).getSimpleInt();
+        int i = daoIndexed.loadAll().get(1).getSimpleInt();
 
         startBenchmark("query");
         List<SimpleEntityIndexed> result = daoIndexed.whereSimpleIntEq(i);
