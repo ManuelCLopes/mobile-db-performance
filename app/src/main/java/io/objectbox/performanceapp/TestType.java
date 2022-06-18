@@ -20,8 +20,8 @@ package io.objectbox.performanceapp;
 import androidx.annotation.NonNull;
 
 public class TestType {
-    public static final String CREATE_UPDATE = "Create & Update";
-    public static final String CREATE_UPDATE_INDEXED = "Create & Update - indexed";
+    public static final String CREATE_UPDATE = "Create";
+    public static final String CREATE_UPDATE_INDEXED = "Create - indexed";
     public static final String CRUD = "Basic operations (CRUD)";
     public static final String CRUD_INDEXED = "Basic operations (CRUD) - indexed";
     public static final String QUERY_STRING = "Query by string";
@@ -33,8 +33,8 @@ public class TestType {
 
 
     public static TestType[] ALL = {
-            new TestType(CREATE_UPDATE, "create-update"),
-            new TestType(CREATE_UPDATE_INDEXED, "create-update-indexed"),
+            new TestType(CREATE_UPDATE, "create"),
+            new TestType(CREATE_UPDATE_INDEXED, "create-indexed"),
             new TestType(CRUD, "crud"),
             new TestType(CRUD_INDEXED, "crud-indexed"),
             new TestType(QUERY_STRING, "query-string"),

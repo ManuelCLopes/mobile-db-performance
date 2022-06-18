@@ -59,10 +59,10 @@ public class RealmPerfTest extends PerfTest {
     public void run(TestType type) {
         switch (type.name) {
             case TestType.CREATE_UPDATE:
-                runCreateUpdateTest();
+                runCreateUpdateTest(false);
                 break;
             case TestType.CREATE_UPDATE_INDEXED:
-                runCreateUpdateIndexedTest();
+                runCreateUpdateIndexedTest(false);
                 break;
             case TestType.CRUD:
                 runCRUDTest();
@@ -103,7 +103,7 @@ public class RealmPerfTest extends PerfTest {
         Realm.deleteRealm(configuration);
     }
 
-    public void runCreateUpdateTest(){
+    public void runCreateUpdateTest(boolean toUpdate){
         int existentEntities = 0;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
             existentEntities = realm.where(SimpleEntity.class).findAll().size();
@@ -118,18 +118,19 @@ public class RealmPerfTest extends PerfTest {
         realm.commitTransaction();
         stopBenchmark();
 
-        for (SimpleEntity entity : list) {
-            setRandomValues(entity);
-
+        if(toUpdate) {
+            for (SimpleEntity entity : list) {
+                setRandomValues(entity);
+            }
+            startBenchmark("update");
+            realm.beginTransaction();
+            realm.insertOrUpdate(list);
+            realm.commitTransaction();
+            stopBenchmark();
         }
-        startBenchmark("update");
-        realm.beginTransaction();
-        realm.insertOrUpdate(list);
-        realm.commitTransaction();
-        stopBenchmark();
     }
 
-    public void runCreateUpdateIndexedTest(){
+    public void runCreateUpdateIndexedTest(boolean toUpdate){
         int existentEntities = 0;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
             existentEntities = realm.where(SimpleEntityIndexed.class).findAll().size();
@@ -145,18 +146,20 @@ public class RealmPerfTest extends PerfTest {
         realm.commitTransaction();
         stopBenchmark();
 
-        for (SimpleEntityIndexed entity : list) {
-            setRandomValues(entity);
+        if(toUpdate) {
+            for (SimpleEntityIndexed entity : list) {
+                setRandomValues(entity);
+            }
+            startBenchmark("update");
+            realm.beginTransaction();
+            realm.insertOrUpdate(list);
+            realm.commitTransaction();
+            stopBenchmark();
         }
-        startBenchmark("update");
-        realm.beginTransaction();
-        realm.insertOrUpdate(list);
-        realm.commitTransaction();
-        stopBenchmark();
     }
 
     public void runCRUDTest() {
-        runCreateUpdateTest();
+        runCreateUpdateTest(true);
 
         startBenchmark("load");
         RealmResults<SimpleEntity> reloaded = realm.where(SimpleEntity.class).findAll();
@@ -198,7 +201,7 @@ public class RealmPerfTest extends PerfTest {
     }
 
     public void runCRUDTestIndexed() {
-        runCreateUpdateIndexedTest();
+        runCreateUpdateIndexedTest(true);
 
         startBenchmark("load");
         RealmResults<SimpleEntityIndexed> reloaded = realm.where(SimpleEntityIndexed.class).findAll();

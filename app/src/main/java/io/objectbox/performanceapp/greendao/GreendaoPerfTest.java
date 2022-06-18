@@ -74,10 +74,10 @@ public class GreendaoPerfTest extends PerfTest {
     public void run(TestType type) {
         switch (type.name) {
             case TestType.CREATE_UPDATE:
-                runCreateUpdateTest();
+                runCreateUpdateTest(false);
                 break;
             case TestType.CREATE_UPDATE_INDEXED:
-                runCreateUpdateIndexedTest();
+                runCreateUpdateIndexedTest(false);
                 break;
             case TestType.CRUD:
                 runCRUDTest();
@@ -127,7 +127,7 @@ public class GreendaoPerfTest extends PerfTest {
         log("DB deleted: " + deleted);
     }
 
-    private void runCreateUpdateTest() {
+    private void runCreateUpdateTest(boolean toUpdate) {
         int existentEntities = (int) dao.count();
         List<SimpleEntity> list = new ArrayList<>(numberEntities);
         for (int i = existentEntities; i < existentEntities + numberEntities; i++) {
@@ -137,15 +137,17 @@ public class GreendaoPerfTest extends PerfTest {
         dao.insertInTx(list);
         stopBenchmark();
 
-        for (SimpleEntity entity : list) {
-            setRandomValues(entity);
+        if(toUpdate) {
+            for (SimpleEntity entity : list) {
+                setRandomValues(entity);
+            }
+            startBenchmark("update");
+            dao.updateInTx(list);
+            stopBenchmark();
         }
-        startBenchmark("update");
-        dao.updateInTx(list);
-        stopBenchmark();
     }
 
-    private void runCreateUpdateIndexedTest(){
+    private void runCreateUpdateIndexedTest(boolean toUpdate){
         int existentEntities = (int) daoIndexed.count();
         List<SimpleEntityIndexed> list = new ArrayList<>(numberEntities);
         for (int i = existentEntities; i < existentEntities + numberEntities; i++) {
@@ -155,16 +157,18 @@ public class GreendaoPerfTest extends PerfTest {
         daoIndexed.insertInTx(list);
         stopBenchmark();
 
-        for (SimpleEntityIndexed entity : list) {
-            setRandomValues(entity);
+        if(toUpdate) {
+            for (SimpleEntityIndexed entity : list) {
+                setRandomValues(entity);
+            }
+            startBenchmark("update");
+            daoIndexed.updateInTx(list);
+            stopBenchmark();
         }
-        startBenchmark("update");
-        daoIndexed.updateInTx(list);
-        stopBenchmark();
     }
 
     public void runCRUDTest() {
-        runCreateUpdateTest();
+        runCreateUpdateTest(true);
 
         startBenchmark("load");
         List<SimpleEntity> reloaded = dao.loadAll();
@@ -183,7 +187,7 @@ public class GreendaoPerfTest extends PerfTest {
     }
 
     public void runCRUDIndexed() {
-        runCreateUpdateIndexedTest();
+        runCreateUpdateIndexedTest(true);
 
         startBenchmark("load");
         List<SimpleEntityIndexed> reloaded = daoIndexed.loadAll();

@@ -70,10 +70,10 @@ public class ObjectBoxPerfTest extends PerfTest {
 
         switch (type.name) {
             case TestType.CREATE_UPDATE:
-                runCreateUpdateTest();
+                runCreateUpdateTest(false);
                 break;
             case TestType.CREATE_UPDATE_INDEXED:
-                runCreateUpdateIndexedTest();
+                runCreateUpdateIndexedTest(false);
                 break;
             case TestType.CRUD:
                 runBatchPerfTest();
@@ -115,27 +115,30 @@ public class ObjectBoxPerfTest extends PerfTest {
         store.deleteAllFiles();
     }
 
-    public void runCreateUpdateTest(){
+    public void runCreateUpdateTest(boolean toUpdate){
         List<SimpleEntity> list = prepareAndPutEntities();
 
         for (SimpleEntity entity : list) {
             setRandomValues(entity);
-
         }
-        startBenchmark("update");
-        box.put(list);
-        stopBenchmark();
+        if(toUpdate) {
+            startBenchmark("update");
+            box.put(list);
+            stopBenchmark();
+        }
     }
 
-    public void runCreateUpdateIndexedTest(){
+    public void runCreateUpdateIndexedTest(boolean toUpdate){
         List<SimpleEntityIndexed> list = prepareAndPutEntitiesIndexed();
 
         for (SimpleEntityIndexed entity : list) {
             setRandomValues(entity);
         }
-        startBenchmark("update");
-        boxIndexed.put(list);
-        stopBenchmark();
+        if(toUpdate) {
+            startBenchmark("update");
+            boxIndexed.put(list);
+            stopBenchmark();
+        }
     }
 
     public void runBatchPerfTest() {
