@@ -19,6 +19,7 @@ public class RoomPerfTest extends PerfTest {
     private AppDatabase db;
     private SimpleEntityDao dao;
     private SimpleEntityIndexedDao daoIndexed;
+    private int existentEntities = 0;
 
     @Override
     public String name() {
@@ -121,11 +122,12 @@ public class RoomPerfTest extends PerfTest {
     }
 
     private void runCreateIndexedTest(boolean toUpdate){
-        int existentEntities = daoIndexed.loadAll().size();
+
         List<SimpleEntityIndexed> list = new ArrayList<>(numberEntities);
         for (int i = existentEntities; i < existentEntities + numberEntities; i++) {
             list.add(createEntityIndexed((long) i));
         }
+        existentEntities += numberEntities;
         startBenchmark("insert");
         daoIndexed.insertInTx(list);
         stopBenchmark();
@@ -138,6 +140,7 @@ public class RoomPerfTest extends PerfTest {
             daoIndexed.updateInTx(list);
             stopBenchmark();
         }
+        list.clear();
     }
 
     private void runCRUDTest() {
@@ -186,7 +189,7 @@ public class RoomPerfTest extends PerfTest {
     }
 
     private void runQueryByStringIndexed() {
-        String s = daoIndexed.loadAll().get(0).getSimpleString();
+        String s = "a";
 
         startBenchmark("query");
         long entitiesFound = db.runInTransaction(() -> {
@@ -210,7 +213,7 @@ public class RoomPerfTest extends PerfTest {
     }
 
     private void runQueryByIntegerIndexed() {
-        int i = daoIndexed.loadAll().get(1).getSimpleInt();
+        int i = 1;
 
         startBenchmark("query");
         List<SimpleEntityIndexed> result = daoIndexed.whereSimpleIntEq(i);
